@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+
 public class Translator
 {
     public static void Run()
@@ -6,9 +9,12 @@ public class Translator
         englishToGerman.AddWord("House", "Haus");
         englishToGerman.AddWord("Car", "Auto");
         englishToGerman.AddWord("Plane", "Flugzeug");
+        englishToGerman.AddWord("Train", "Zug");
         Console.WriteLine(englishToGerman.Translate("Car")); // Auto
         Console.WriteLine(englishToGerman.Translate("Plane")); // Flugzeug
-        Console.WriteLine(englishToGerman.Translate("Train")); // ???
+        Console.WriteLine(englishToGerman.Translate("Train")); // Zug
+        Console.WriteLine(englishToGerman.Translate("House")); // Haus
+        
     }
 
     private Dictionary<string, string> _words = new();
@@ -22,9 +28,11 @@ public class Translator
     /// <param name="fromWord">The word to translate from</param>
     /// <param name="toWord">The word to translate to</param>
     /// <returns>fixed array of divisors</returns>
+    
     public void AddWord(string fromWord, string toWord)
     {
-        // ADD YOUR CODE HERE
+        if (string.IsNullOrEmpty(fromWord)) return;
+        _words[fromWord] = toWord;
     }
 
     /// <summary>
@@ -32,9 +40,10 @@ public class Translator
     /// </summary>
     /// <param name="fromWord">The word to translate</param>
     /// <returns>The translated word or "???" if no translation is available</returns>
+    /// 
     public string Translate(string fromWord)
     {
-        // ADD YOUR CODE HERE
-        return "";
+        if (string.IsNullOrEmpty(fromWord)) return "???";
+        return _words.TryGetValue(fromWord, out var toWord) ? toWord : "???";
     }
 }
