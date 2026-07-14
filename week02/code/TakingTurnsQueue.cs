@@ -1,3 +1,4 @@
+using System;
 /// <summary>
 /// This queue is circular.  When people are added via AddPerson, then they are added to the 
 /// back of the queue (per FIFO rules).  When GetNextPerson is called, the next person
@@ -18,10 +19,27 @@ public class TakingTurnsQueue
     /// </summary>
     /// <param name="name">Name of the person</param>
     /// <param name="turns">Number of turns remaining</param>
+    /// <exception cref="ArgumentException">Thrown if the name is null or empty</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown if the turns is less than 0</exception>
+    /// <exception cref="InvalidOperationException">Thrown if the queue is full</exception>
+    /// 
+    /// 
     public void AddPerson(string name, int turns)
     {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException("Name cannot be null or empty.", nameof(name));
+        }
+ 
         var person = new Person(name, turns);
+        int beforeLength = _people.Length;
+
         _people.Enqueue(person);
+
+        if (_people.Length != beforeLength + 1)
+        {
+            throw new InvalidOperationException("Enqueue did not increment the queue length.");
+        }
     }
 
     /// <summary>
@@ -39,13 +57,44 @@ public class TakingTurnsQueue
         }
         else
         {
+            int beforeLength = _people.Length;
             Person person = _people.Dequeue();
-            if (person.Turns > 1)
+
+            if (_people.Length != beforeLength - 1)
             {
-                person.Turns -= 1;
-                _people.Enqueue(person);
+                throw new InvalidOperationException("Dequeue did not decrement the queue length.");
             }
 
+            if (person.Turns <= 0)
+            {
+                // Person has infinite turns, so we don't modify their turns and re-add them to the queue
+
+                Console.WriteLine($"Person {person.Name} has {person.Turns}.");
+
+                int beforeEnqueue = _people.Length;
+                
+                _people.Enqueue(person);
+
+                if (_people.Length != beforeEnqueue + 1)
+                {
+                    throw new InvalidOperationException("Enqueue did not increment the queue length.");
+                }
+            }
+            else
+            {
+                person.Turns -= 1;
+                if (person.Turns > 0)
+                {
+                    int beforeEnqueue = _people.Length;
+
+                    _people.Enqueue(person);
+                    
+                    if (_people.Length != beforeEnqueue + 1)
+                    {
+                        throw new InvalidOperationException("Enqueue did not increment the queue length.");
+                    }
+                }
+            }
             return person;
         }
     }
