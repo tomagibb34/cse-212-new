@@ -2,12 +2,15 @@
     public static void Run() {
         var test1 = "abcdefghjiklmnopqrstuvwxyz"; // Expect True because all letters unique
         Console.WriteLine(AreUniqueLetters(test1));
+        Console.WriteLine(AreUniqueLettersSet(test1));
 
         var test2 = "abcdefghjiklanopqrstuvwxyz"; // Expect False because 'a' is repeated
         Console.WriteLine(AreUniqueLetters(test2));
+        Console.WriteLine(AreUniqueLettersSet(test2));
 
         var test3 = "";
         Console.WriteLine(AreUniqueLetters(test3)); // Expect True because its an empty string
+        Console.WriteLine(AreUniqueLettersSet(test3));
     }
 
     /// <summary>Determine if there are any duplicate letters in the text provided</summary>
@@ -23,6 +26,15 @@
             }
         }
 
+        return true;
+    }
+    private static bool AreUniqueLettersSet(string text) {
+        var letters = new HashSet<char>();
+        foreach (var letter in text) {
+            if (!letters.Add(letter)) {
+                return false;
+            }
+        }
         return true;
     }
 }
