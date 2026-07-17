@@ -1,3 +1,19 @@
+// CSE 212 Lesson Week 3 Problem 4.
+// Developer - Tom Gibb
+// This code defines a maze using a dictionary. The dictionary is provided by the
+// user when the Maze object is created. The dictionary will contain the following mapping:
+// (x,y) : [left, right, up, down]
+// 'x' and 'y' are integers and represents locations in the maze.
+// 'left', 'right', 'up', and 'down' are boolean are represent valid directions
+// If a direction is false, then we can assume there is a wall in that direction.
+// If a direction is true, then we can proceed.
+// If there is a wall, then throw an InvalidOperationException with the message "Can't go that way!".  If there is no wall,
+// then the 'currX' and 'currY' values should be changed.
+// Starting location is (1,1).  The maze is 6 x 6.  The destination is (6,6).
+// If the user reaches the destination, then print "You have reached the destination!" and exit the program.
+
+
+
 /// <summary>
 /// Defines a maze using a dictionary. The dictionary is provided by the
 /// user when the Maze object is created. The dictionary will contain the
@@ -32,7 +48,13 @@ public class Maze
     /// </summary>
     public void MoveLeft()
     {
-        // FILL IN CODE
+        var key = (_currX, _currY);
+        if (!_mazeMap.TryGetValue(key, out var directions) || directions.Length < 1 || !directions[0])
+        {
+            throw new InvalidOperationException("Can't go that way!");
+        }
+
+        _currX--;
     }
 
     /// <summary>
@@ -41,7 +63,13 @@ public class Maze
     /// </summary>
     public void MoveRight()
     {
-        // FILL IN CODE
+        var key = (_currX, _currY);
+        if (!_mazeMap.TryGetValue(key, out var directions) || directions.Length < 2 || !directions[1])
+        {
+            throw new InvalidOperationException("Can't go that way!");
+        }
+
+        _currX++;
     }
 
     /// <summary>
@@ -50,7 +78,13 @@ public class Maze
     /// </summary>
     public void MoveUp()
     {
-        // FILL IN CODE
+        var key = (_currX, _currY);
+        if (!_mazeMap.TryGetValue(key, out var directions) || directions.Length < 3 || !directions[2])
+        {
+            throw new InvalidOperationException("Can't go that way!");
+        }
+
+        _currY--;
     }
 
     /// <summary>
@@ -59,7 +93,13 @@ public class Maze
     /// </summary>
     public void MoveDown()
     {
-        // FILL IN CODE
+        var key = (_currX, _currY);
+        if (!_mazeMap.TryGetValue(key, out var directions) || directions.Length < 4 || !directions[3])
+        {
+            throw new InvalidOperationException("Can't go that way!");
+        }
+
+        _currY++;
     }
 
     public string GetStatus()

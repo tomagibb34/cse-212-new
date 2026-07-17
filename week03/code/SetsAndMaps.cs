@@ -1,3 +1,23 @@
+// CSE 212 Lesson Week 3 Problem 1,2,3,5.
+// Developer - Tom Gibb
+//
+// This code defines a class called SetsAndMaps.  The class contains static methods that
+// use sets and maps to solve problems.  The problems are described in the comments above each
+/// method.  The methods are called from the Main method in SetsAndMaps.cs.  The methods are
+// called with the appropriate parameters and the return values are printed to the console.
+// Do not make changes to the SetsAndMaps class.  You will be adding code to the methods to solve the problems.
+// The problems are described in the comments above each method.  The methods are called from the Main method in SetsAndMaps.cs.
+// The methods are called with the appropriate parameters and the return values are printed to the console.
+
+
+
+
+
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net.Http;
 using System.Text.Json;
 
 public static class SetsAndMaps
@@ -21,8 +41,36 @@ public static class SetsAndMaps
     /// <param name="words">An array of 2-character words (lowercase, no duplicates)</param>
     public static string[] FindPairs(string[] words)
     {
-        // TODO Problem 1 - ADD YOUR CODE HERE
-        return [];
+        // Evaluate the contents of the 'words' array and return an array of strings that contain the symmetric pairs of words.
+        // For example, if words was: [am, at, ma, if, fi], we would return : ["am & ma", "if & fi"]
+        // The order of the array does not matter, nor does the order of the specific words in each string in the array.
+        // at would not be returned because ta is not in the list of words.
+        // Implement a test for null string
+        // Implement code for triple or more words
+
+
+        if (words == null) return Array.Empty<string>();
+
+        var pairs = new List<string>();
+
+        // build set ignoring any null entries
+        
+        var wordSet = new HashSet<string>(words.Where(w => w != null));
+        var seen = new HashSet<string>();
+
+        foreach (var word in wordSet)
+        {
+            if (seen.Contains(word)) continue;
+            var reversed = new string(word.Reverse().ToArray());
+            if (word != reversed && wordSet.Contains(reversed))
+            {
+                pairs.Add($"{word} & {reversed}");
+                seen.Add(word);
+                seen.Add(reversed);
+            }
+        }
+
+        return pairs.ToArray();
     }
 
     /// <summary>
@@ -42,8 +90,20 @@ public static class SetsAndMaps
         foreach (var line in File.ReadLines(filename))
         {
             var fields = line.Split(",");
-            // TODO Problem 2 - ADD YOUR CODE HERE
+            // Expect degree in 4th column (index 3). Skip malformed lines.
+            if (fields.Length < 4) continue;
+            var degree = fields[3]?.Trim();
+            if (string.IsNullOrEmpty(degree)) continue;
+
+            if (degrees.ContainsKey(degree)) degrees[degree]++;
+            else degrees[degree] = 1;
         }
+
+        // Return dictionary ordered from most to least frequent (insertion order preserved)
+        //var ordered = degrees
+        //    .OrderByDescending(kv => kv.Value)
+        //    .ThenBy(kv => kv.Key)
+        //    .ToDictionary(kv => kv.Key, kv => kv.Value);
 
         return degrees;
     }
@@ -66,8 +126,32 @@ public static class SetsAndMaps
     /// </summary>
     public static bool IsAnagram(string word1, string word2)
     {
-        // TODO Problem 3 - ADD YOUR CODE HERE
-        return false;
+        if (word1 == null || word2 == null) return false;
+        
+        // Normalize: remove spaces and convert to lowercase
+        var normalized1 = word1.Replace(" ", "").ToLower();
+        var normalized2 = word2.Replace(" ", "").ToLower();
+        
+        // If lengths differ, they can't be anagrams
+        if (normalized1.Length != normalized2.Length) return false;
+        
+        // Count character frequencies in word1
+        var charCount = new Dictionary<char, int>();
+        foreach (var c in normalized1)
+        {
+            if (charCount.ContainsKey(c)) charCount[c]++;
+            else charCount[c] = 1;
+        }
+        
+        // Verify word2 has same character frequencies
+        foreach (var c in normalized2)
+        {
+            if (!charCount.ContainsKey(c)) return false;
+            charCount[c]--;
+            if (charCount[c] < 0) return false;
+        }
+        
+        return true;
     }
 
     /// <summary>
