@@ -20,6 +20,8 @@ using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 
+#nullable enable
+
 public static class SetsAndMaps
 {
     /// <summary>
@@ -168,6 +170,11 @@ public static class SetsAndMaps
     /// https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php
     /// 
     /// </summary>
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
+
     public static string[] EarthquakeDailySummary()
     {
         const string uri = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson";
@@ -176,15 +183,40 @@ public static class SetsAndMaps
         using var jsonStream = client.Send(getRequestMessage).Content.ReadAsStream();
         using var reader = new StreamReader(jsonStream);
         var json = reader.ReadToEnd();
-        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
 
-        var featureCollection = JsonSerializer.Deserialize<FeatureCollection>(json, options);
+        var featureCollection = JsonSerializer.Deserialize<FeatureCollection>(json, JsonOptions);
 
-        // TODO Problem 5:
-        // 1. Add code in FeatureCollection.cs to describe the JSON using classes and properties 
-        // on those classes so that the call to Deserialize above works properly.
-        // 2. Add code below to create a string out each place a earthquake has happened today and its magitude.
-        // 3. Return an array of these string descriptions.
-        return [];
+        if (featureCollection?.Features == null) return [];
+
+        List<string> summaries = [];
+        
+        foreach (var feature in featureCollection.Features)
+        {
+            if (feature?.Properties == null) continue;
+
+            var place = feature.Properties.Place;
+            var magnitude = feature.Properties.Mag;
+            if (string.IsNullOrWhiteSpace(place)) continue;
+
+            summaries.Add($"{place} - Mag {magnitude?.ToString() ?? "unknown"}");
+        }
+
+        return [.. summaries];
+    }
+
+    private sealed class FeatureCollection
+    {
+        public List<Feature>? Features { get; set; }
+    }
+
+    private sealed class Feature
+    {
+        public Properties? Properties { get; set; }
+    }
+
+    private sealed class Properties
+    {
+        public string? Place { get; set; }
+        public double? Mag { get; set; }
     }
 }
