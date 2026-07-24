@@ -1,6 +1,6 @@
 ﻿public class PriorityQueue
 {
-    private List<PriorityItem> _queue = new();
+    private readonly List<PriorityItem> _queue = [];
 
     /// <summary>
     /// Add a new value to the queue with an associated priority.  The
@@ -11,35 +11,30 @@
     /// <param name="priority">The priority</param>
     public void Enqueue(string value, int priority)
     {
-        var newNode = new PriorityItem(value, priority);
-        _queue.Add(newNode);
+        _queue.Add(new PriorityItem(value, priority));
     }
 
     public string Dequeue()
     {
-        // Check if the queue is empty before attempting to dequeue
-
-        if (_queue.Count == 0) // Verify the queue is not empty
-        {
-            throw new InvalidOperationException("The queue is empty.");
-        }
-
         // Find the index of the item with the highest priority to remove
         var highPriorityIndex = 0;
+        var allPrioritiesEqual = true;
         for (int index = 1; index < _queue.Count; index++)
         {
+            if (_queue[index].Priority != _queue[0].Priority)
+                allPrioritiesEqual = false;
+
             if (_queue[index].Priority > _queue[highPriorityIndex].Priority)
-            {
                 highPriorityIndex = index;
-            }
         }
 
-        // Remove and return the item with the highest priority
-        
-        var value = _queue[highPriorityIndex].Value;
-        _queue.RemoveAt(highPriorityIndex);
+        if (allPrioritiesEqual)
+            highPriorityIndex = 0;
 
-        return value;
+        // Remove and return the item with the highest priority
+        var item = _queue[highPriorityIndex];
+        _queue.RemoveAt(highPriorityIndex);
+        return item.Value;
     }
 
     // DO NOT MODIFY THE CODE IN THIS METHOD

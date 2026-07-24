@@ -26,19 +26,24 @@ public class TakingTurnsQueue
     /// 
     public void AddPerson(string name, int turns)
     {
-        if (string.IsNullOrWhiteSpace(name))
+        //if (string.IsNullOrWhiteSpace(name))
+        //{
+        //    throw new ArgumentException("Name cannot be null or empty.", nameof(name));
+        //}
+        
+        //if (turns < 0)
+        //{
+        //    throw new ArgumentOutOfRangeException(nameof(turns), "Turns cannot be less than 0.");
+        //}
+
+        try
         {
-            throw new ArgumentException("Name cannot be null or empty.", nameof(name));
+            _people.Enqueue(new Person(name, turns));
         }
- 
-        var person = new Person(name, turns);
-        int beforeLength = _people.Length;
-
-        _people.Enqueue(person);
-
-        if (_people.Length != beforeLength + 1)
+        catch (InvalidOperationException exception)
         {
-            throw new InvalidOperationException("Enqueue did not increment the queue length.");
+            // Preserve the documented exception type when the underlying queue is full.
+            throw new InvalidOperationException("The queue is full.", exception);
         }
     }
 
@@ -55,48 +60,23 @@ public class TakingTurnsQueue
         {
             throw new InvalidOperationException("No one in the queue.");
         }
-        else
+
+        Person person = _people.Dequeue();
+
+        // A turn value of 0 or less means the person remains in the queue forever.
+        if (person.Turns <= 0)
         {
-            int beforeLength = _people.Length;
-            Person person = _people.Dequeue();
-
-            if (_people.Length != beforeLength - 1)
-            {
-                throw new InvalidOperationException("Dequeue did not decrement the queue length.");
-            }
-
-            if (person.Turns <= 0)
-            {
-                // Person has infinite turns, so we don't modify their turns and re-add them to the queue
-
-                Console.WriteLine($"Person {person.Name} has {person.Turns}.");
-
-                int beforeEnqueue = _people.Length;
-                
-                _people.Enqueue(person);
-
-                if (_people.Length != beforeEnqueue + 1)
-                {
-                    throw new InvalidOperationException("Enqueue did not increment the queue length.");
-                }
-            }
-            else
-            {
-                person.Turns -= 1;
-                if (person.Turns > 0)
-                {
-                    int beforeEnqueue = _people.Length;
-
-                    _people.Enqueue(person);
-                    
-                    if (_people.Length != beforeEnqueue + 1)
-                    {
-                        throw new InvalidOperationException("Enqueue did not increment the queue length.");
-                    }
-                }
-            }
+            _people.Enqueue(person);
             return person;
         }
+
+        person.Turns--;
+        if (person.Turns > 0)
+        {
+            _people.Enqueue(person);
+        }
+
+        return person;
     }
 
     public override string ToString()
